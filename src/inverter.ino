@@ -158,23 +158,29 @@ void parseJsonv3local(String json)
   if (error) {
     Serial.printf("deserializeJson() failed: %s\n", error.c_str());
   } else {
-    inverter.gridv = (float)root["Data"][0] / 10.0;   // Tension de red
-    inverter.wsolar = (float)root["Data"][2];         // Potencia solar
-    inverter.pv1v = (float)root["Data"][3] / 10.0;    // Tension string 1
-    inverter.pv2v = (float)root["Data"][4] / 10.0;    // Tension string 2
-    inverter.pv1c = (float)root["Data"][5] / 10.0;    // Corriente string 1
-    inverter.pv2c = (float)root["Data"][6] / 10.0;    // Corriente string 2
-    inverter.pw1 = (float)root["Data"][7];            // Potencia string 1
-    inverter.pw2 = (float)root["Data"][8];            // Potencia string 2
-    inverter.wtoday = (float)root["Data"][13] / 10.0; // Potencia solar diaria
-    inverter.temperature = (float)root["Data"][39];   // Temperatura
-    inverter.wgrid = (float)root["Data"][48] - (float)root["Data"][49];   // Potencia de red (Negativo: de red - Positivo: a red)
-    //inverter.wtogrid = 0; // Potencia diaria enviada a red
+    inverter.pv1c = (float)root["Data"][12] / 10.0;     // Corriente string 1
+    inverter.pv2c = (float)root["Data"][13] / 10.0;     // Corriente string 2
+    inverter.pv1v = (float)root["Data"][10] / 10.0;     // Tension string 1
+    inverter.pv2v = (float)root["Data"][11] / 10.0;     // Tension string 2
+    inverter.pw1 = root["Data"][14];     // Potencia string 1
+    inverter.pw2 = root["Data"][15];     // Potencia string 2
+    inverter.wsolar = inverter.pw1 + inverter.pw2;     // Potencia solar
 
-    // meter.voltage = root["Data"][13];
-    // meter.current = root["Data"][14];
-    // inverter.batteryWatts = root["Data"][15];
-    // inverter.batterySoC = root["Data"][17];
+    inverter.gridv = (float)root["Data"][0] / 10.0;    // Tension de red
+    meter.frequency = (float)root["Data"][16] / 100.0;    // AC Frequency
+    inverter.temperature = root["Data"][46];   // Temperatura
+
+    inverter.wtoday = (float)root["Data"][82] / 10.0;   // Potencia solar diaria
+    inverter.wgrid = (int16_t)((uint16_t)root["Data"][34]);   // Potencia de red (Negativo: de red - Positivo: a red)
+
+    meter.voltage = (float)root["Data"][39] / 100.0;   // battery voltage
+    meter.current = (int16_t)((uint16_t)root["Data"][40] / 100);   // battery current
+    inverter.batteryWatts = (int16_t)((uint16_t)root["Data"][41]);
+    inverter.batterySoC = root["Data"][103];
+
+    //inverter.wtogrid = (float)root["Data"][90] / 100; // Potencia diaria enviada a red
+
+    inverter.loadWatts = root["Data"][47];
 
     if (config.flags.changeGridSign) { inverter.wgrid *= -1.0; }
 

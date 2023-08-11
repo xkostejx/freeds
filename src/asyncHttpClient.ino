@@ -283,8 +283,9 @@ void processingData(void)
   switch (config.wversion)
   {
     case SOLAX_V2_LOCAL: // Solax v2 local mode
-      if (config.solaxVersion == 2) { parseJsonv2local(message.message); }
-      else { parseJsonv3local(message.message); }
+      //if (config.solaxVersion == 2) { parseJsonv2local(message.message); }
+      //else { parseJsonv3local(message.message); }
+      parseJsonv3local(message.message);
       break;
     case SOLAX_V1: // Solax v1
       parseJsonv1(message.message);
