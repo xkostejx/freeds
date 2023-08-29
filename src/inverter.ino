@@ -151,12 +151,14 @@ void parseJsonv2local(char *json)
   }
 }
 
-void parseJsonv3local(String json)
+void parseJsonv3local(char *json)
 {
+  if (config.flags.debug3) { INFOV("Size: %d, Json: %s\n", strlen(json), json); }
+  
   DeserializationError error = deserializeJson(root, json);
 
   if (error) {
-    Serial.printf("deserializeJson() failed: %s\n", error.c_str());
+    INFOV("deserializeJson() failed: %s\n", error.c_str());
   } else {
     inverter.pv1c = (float)root["Data"][12] / 10.0;     // Corriente string 1
     inverter.pv2c = (float)root["Data"][13] / 10.0;     // Corriente string 2

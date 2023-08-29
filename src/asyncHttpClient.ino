@@ -29,6 +29,8 @@ boolean receivingData = false;
 boolean firstChunk = false;
 uint8_t chunkNumber = 1;
 
+boolean endHeaderSplit = false;
+
 uint8_t shellySensor = 1;
 
 struct TCP_MESSAGE
@@ -116,8 +118,11 @@ void runAsyncClient()
       case SOLAX_V2_LOCAL: // Solax v2 local mode
         // strcpy(url, "POST /?optType=ReadRealTimeData HTTP/1.1\r\nHost: 5.8.8.8\r\nConnection: close\r\nContent-Length: 0\r\nAccept: /*/\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Requested-With: com.solaxcloud.starter\r\n\r\n");
         // strcpy(url, "POST /?optType=ReadRealTimeData&pwd=admin HTTP/1.1\r\nHost: 5.8.8.8\r\nConnection: close\r\nContent-Length: 0\r\nAccept: /*/\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Requested-With: com.solaxcloud.starter\r\n\r\n");
+
+        // SOLAX_V3 POST request
+        sprintf(url, "POST / HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nContent-Length: 39\r\nAccept: /*/\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Requested-With: com.solaxcloud.starter\r\n\r\noptType=ReadRealTimeData&pwd=Slx.v3.pwd", config.sensor_ip);
         
-        sprintf(url, "POST /?optType=ReadRealTimeData&pwd=admin HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nContent-Length: 0\r\nAccept: /*/\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Requested-With: com.solaxcloud.starter\r\n\r\n", config.sensor_ip);
+        //sprintf(url, "POST /?optType=ReadRealTimeData&pwd=admin HTTP/1.1\r\nHost: %s\r\nConnection: close\r\nContent-Length: 0\r\nAccept: /*/\r\nContent-Type: application/x-www-form-urlencoded\r\nX-Requested-With: com.solaxcloud.starter\r\n\r\n", config.sensor_ip);
         // sprintf(url, "POST /?optType=ReadRealTimeData&pwd=admin\r\n\r\n");
         break;
       case SOLAX_V1: // Solax v1
@@ -178,6 +183,20 @@ void runAsyncClient()
 
     // Search for end of header
     dataPayload = strstr(d, "\r\n\r\n", len, 4);
+    
+    // Check if end of header is splitted in two chunks
+    if (dataPayload == NULL) {
+        // Previous chunk ends with CRLF and this stars with CRLF = end of header
+        if (endHeaderSplit && strstr(d, "\r\n", 2, 2)) {
+            // dataPayload index starts in "previous" CRLF
+            dataPayload = d - 2;
+        } 
+        // This chunk ends with CRLF
+        else if (strstr(d + len - 2, "\r\n", 2, 2)) {
+            endHeaderSplit = true;
+        }
+    }
+
     if (dataPayload != NULL) {
       uint16_t payloadPos = (uint16_t)(dataPayload - d + 4);
       if (config.flags.debug5) { INFOV(PSTR("End Header received in position %d\n"), payloadPos); }

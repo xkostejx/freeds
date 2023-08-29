@@ -522,7 +522,7 @@ struct
   char _DERIVADOR_[32];
   char _COMPILATION_[22];
 } lang;
-
+  
 struct tm timeinfo;
 
 #define LOGGINGSIZE 20 //30
@@ -555,7 +555,8 @@ IPAddress modbusIP;
 
 HardwareSerial SerieEsp(2);   // RX, TX para esp-01
 HardwareSerial SerieMeter(1); // RX, TX para los Meter rs485/modbus
-DynamicJsonDocument root(4096); // 3072
+//DynamicJsonDocument root(4096); // 3072
+DynamicJsonDocument root(6144); //4096 + 2048 SolaxV3 need more than 4096
 
 TickerScheduler Tickers(7);
 
